@@ -302,13 +302,16 @@ class IMDB:
         for zip_el in data:
             rel_date = zip_el[0].text
             ulist = zip_el[1].find('a')
-            for movie in ulist:
-                output.append({
+            output.extend(
+                {
                     'id': movie.attrs['href'].split('/')[2],
                     'name': movie.text,
                     'url': self.baseURL + movie.attrs['href'],
-                    'release_data': rel_date
-                })
+                    'release_data': rel_date,
+                }
+                for movie in ulist
+            )
+
         results = {'result_count': len(output), 'results': output}
         if results['result_count'] > 0:
             return json.dumps(results, indent=2)
@@ -341,8 +344,8 @@ class IMDB:
                 # getting year
                 year = year.find('span', containing='(')[0] if bool(year.find('span', containing='(')) else ""
                 year = "".join(re.findall(r"\d+", year.text))
-                year = year[:4] + "-" + year[4:] if len(year) == 8 else year   # for TV
-                year = year if len(year) == 4 else year  # for movies
+                year = f"{year[:4]}-{year[4:]}" if len(year) == 8 else year
+                year = year
 
                 # getting poster
                 file_id = href.split('/')[2]
